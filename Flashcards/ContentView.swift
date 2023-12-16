@@ -7,7 +7,14 @@
 
 import SwiftUI
 
+struct Flashcard: Identifiable {
+    var id = UUID()
+    var question: String
+    var answer: String
+}
+
 struct ContentView: View {
+    @State private var flashcards: [Flashcard] = []
     @State private var userQuestion: String = ""
     @State private var userAnswer: String = ""
 
@@ -26,37 +33,37 @@ struct ContentView: View {
                     .padding()
                     .textFieldStyle(RoundedBorderTextFieldStyle())
 
-                NavigationLink(destination: FlashcardView(question: userQuestion, answer: userAnswer)) {
+                Button(action: addFlashcard) {
                     Text("Create Flashcard")
                         .padding()
                         .background(Color.accentColor)
                         .foregroundColor(.white)
                         .cornerRadius(8)
                 }
+
+                List(flashcards) { flashcard in
+                    VStack(alignment: .leading) {
+                        Text("Question: \(flashcard.question)")
+                            .padding(.bottom, 4)
+
+                        Text("Answer: \(flashcard.answer)")
+                            .foregroundColor(.gray)
+                    }
+                }
             }
             .padding()
             .navigationTitle("FlashCards App")
         }
     }
-}
 
-struct FlashcardView: View {
-    var question: String
-    var answer: String
-
-    var body: some View {
-        VStack {
-            Text("Question: \(question)")
-                .padding()
-
-            Text("Answer: \(answer)")
-                .padding()
-        }
-        .navigationTitle("Flashcard")
+    func addFlashcard() {
+        guard !userQuestion.isEmpty && !userAnswer.isEmpty else { return }
+        let newFlashcard = Flashcard(question: userQuestion, answer: userAnswer)
+        flashcards.append(newFlashcard)
+        userQuestion = ""
+        userAnswer = ""
     }
 }
-
-
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
