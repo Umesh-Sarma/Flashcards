@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var userQuestion: String = ""
+    @State private var userAnswer: String = ""
 
     var body: some View {
         NavigationView {
@@ -21,7 +22,11 @@ struct ContentView: View {
                     .padding()
                     .textFieldStyle(RoundedBorderTextFieldStyle())
 
-                NavigationLink(destination: FlashcardView(question: userQuestion)) {
+                TextField("Type your answer here", text: $userAnswer)
+                    .padding()
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                NavigationLink(destination: FlashcardView(question: userQuestion, answer: userAnswer)) {
                     Text("Create Flashcard")
                         .padding()
                         .background(Color.accentColor)
@@ -37,13 +42,20 @@ struct ContentView: View {
 
 struct FlashcardView: View {
     var question: String
+    var answer: String
 
     var body: some View {
-        Text("Your Question: \(question)")
-            .padding()
-            .navigationTitle("Flashcard")
+        VStack {
+            Text("Question: \(question)")
+                .padding()
+
+            Text("Answer: \(answer)")
+                .padding()
+        }
+        .navigationTitle("Flashcard")
     }
 }
+
 
 
 struct ContentView_Previews: PreviewProvider {
