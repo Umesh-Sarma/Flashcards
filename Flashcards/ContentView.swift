@@ -62,6 +62,14 @@ struct ContentView: View {
             }
             .padding()
             .navigationTitle("FlashCards App")
+            .navigationBarItems(trailing:
+                Button(action: resetApp) {
+                    Image(systemName: "arrow.counterclockwise.circle.fill")
+                        .imageScale(.large)
+                        .foregroundColor(.blue)
+                        .padding()
+                }
+            )
         }
     }
 
@@ -72,28 +80,63 @@ struct ContentView: View {
         userQuestion = ""
         userAnswer = ""
     }
+
+    func resetApp() {
+        withAnimation {
+            flashcards.removeAll()
+        }
+    }
 }
 
 struct QuizView: View {
     var flashcards: [Flashcard]
 
+    @State private var isFlippedArray: [Bool]
+
+    init(flashcards: [Flashcard]) {
+        self.flashcards = flashcards
+        self._isFlippedArray = State(initialValue: Array(repeating: false, count: flashcards.count))
+    }
+
     var body: some View {
         VStack {
+            HStack {
+                Spacer()
+                Button(action: resetQuiz) {
+                    Image(systemName: "arrow.counterclockwise.circle.fill")
+                        .imageScale(.large)
+                        .foregroundColor(.blue)
+                        .padding()
+                }
+            }
+            .padding()
+
             Text("Quiz Screen")
                 .font(.largeTitle)
                 .padding()
 
-            ForEach(flashcards) { flashcard in
-                QuizCardView(flashcard: flashcard)
+            ForEach(Array(zip(flashcards, isFlippedArray)), id: \.0.id) { flashcard, isFlipped in
+                QuizCardView(flashcard: flashcard, isFlipped: isFlipped) { flipped in
+                    if let index = flashcards.firstIndex(where: { $0.id == flashcard.id }) {
+                        isFlippedArray[index] = flipped
+                    }
+                }
             }
         }
         .navigationTitle("Quiz")
     }
+
+    func resetQuiz() {
+        withAnimation {
+            isFlippedArray = Array(repeating: false, count: flashcards.count)
+        }
+    }
 }
 
 struct QuizCardView: View {
-    @State private var isFlipped = false
     let flashcard: Flashcard
+    let isFlipped: Bool
+    let onFlip: (Bool) -> Void
 
     var body: some View {
         VStack {
@@ -115,7 +158,7 @@ struct QuizCardView: View {
         .cornerRadius(8)
         .onTapGesture {
             withAnimation {
-                self.isFlipped.toggle()
+                self.onFlip(!self.isFlipped)
             }
         }
         .rotation3DEffect(
@@ -130,5 +173,3 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
-
-
