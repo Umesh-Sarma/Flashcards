@@ -51,7 +51,6 @@ struct ContentView: View {
                     }
                 }
 
-
                 NavigationLink(destination: QuizView(flashcards: flashcards)) {
                     Text("Start Quiz")
                         .padding()
@@ -101,6 +100,10 @@ struct QuizCardView: View {
             if isFlipped {
                 Text("Answer: \(flashcard.answer)")
                     .padding()
+                    .rotation3DEffect(
+                        .degrees(180),
+                        axis: (x: 0.0, y: 1.0, z: 0.0)
+                    )
             } else {
                 Text("Question: \(flashcard.question)")
                     .padding()
@@ -127,4 +130,5 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
+
 
