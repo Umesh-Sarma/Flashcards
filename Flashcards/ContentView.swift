@@ -42,8 +42,15 @@ struct ContentView: View {
                 }
 
                 List(flashcards) { flashcard in
-                    QuizCardView(flashcard: flashcard)
+                    VStack(alignment: .leading) {
+                        Text("Question: \(flashcard.question)")
+                            .padding(.bottom, 4)
+
+                        Text("Answer: \(flashcard.answer)")
+                            .foregroundColor(.gray)
+                    }
                 }
+
 
                 NavigationLink(destination: QuizView(flashcards: flashcards)) {
                     Text("Start Quiz")
