@@ -14,32 +14,46 @@ struct Flashcard: Identifiable {
 }
 
 struct ContentView: View {
+    // Properties for managing state and data
     @State private var flashcards: [Flashcard] = []
     @State private var userQuestion: String = ""
     @State private var userAnswer: String = ""
 
     var body: some View {
+        // Main navigation view
         NavigationView {
             VStack {
+                // User input for question
                 TextField("Type your question here", text: $userQuestion)
                     .padding()
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .background(RoundedRectangle(cornerRadius: 8).stroke(Color.blue, lineWidth: 2))
+                    .padding(.horizontal)
 
+                // User input for answer
                 TextField("Type your answer here", text: $userAnswer)
                     .padding()
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .background(RoundedRectangle(cornerRadius: 8).stroke(Color.blue, lineWidth: 2))
+                    .padding(.horizontal)
 
+                // Button to create a new flashcard
                 Button(action: addFlashcard) {
                     Text("Create Flashcard")
-                        .padding()
-                        .background(Color.accentColor)
+                        .padding(10)
+                        .background(Color.blue)
                         .foregroundColor(.white)
-                        .cornerRadius(8)
+                        .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.blue, lineWidth: 2)
+                        )
                 }
+                .padding(.top, 10)
 
+                // List displaying created flashcards
                 List {
                     ForEach(flashcards) { flashcard in
                         HStack {
+                            // Displaying flashcard question and answer
                             VStack(alignment: .leading) {
                                 Text("Question: \(flashcard.question)")
                                     .padding(.bottom, 4)
@@ -48,37 +62,44 @@ struct ContentView: View {
                                     .foregroundColor(.gray)
                             }
 
+                            // Button to delete a flashcard
                             Spacer()
-
                             Button(action: {
-                                // Show delete confirmation or perform deletion
                                 deleteFlashcard(flashcard)
                             }) {
                                 Image(systemName: "minus.circle")
                                     .foregroundColor(.red)
                                     .padding()
                             }
-                            .buttonStyle(BorderlessButtonStyle()) // Use BorderlessButtonStyle to avoid highlighting
+                            .buttonStyle(BorderlessButtonStyle())
                         }
-                        .contentShape(Rectangle()) // Make the whole row tappable
-                        .onTapGesture {} // Empty onTapGesture to avoid triggering row tap
+                        .contentShape(Rectangle())
+                        .onTapGesture {}
+                        .padding(.vertical, 8)
                     }
                 }
+                .padding(.horizontal)
 
+                // Navigation link to start the quiz
                 NavigationLink(destination: QuizView(flashcards: flashcards)) {
                     Text("Start Quiz")
-                        .padding()
+                        .padding(10)
                         .background(Color.blue)
                         .foregroundColor(.white)
-                        .cornerRadius(8)
+                        .cornerRadius(12)
                         .padding(.top, 20)
                 }
+                .padding(.horizontal)
             }
             .padding()
-            .navigationTitle("FlashCards App")
+
+            // Navigation bar settings
+            .background(Color(UIColor.systemTeal)) // Background color
+            .navigationTitle("FlashCards App") // Title
             .navigationBarItems(trailing:
+                // Button to reset the app
                 Button(action: resetApp) {
-                    Text("Reset")
+                    Image(systemName: "arrow.counterclockwise.circle.fill")
                         .foregroundColor(.blue)
                         .padding()
                 }
@@ -86,6 +107,7 @@ struct ContentView: View {
         }
     }
 
+    // Function to add a new flashcard
     func addFlashcard() {
         guard !userQuestion.isEmpty && !userAnswer.isEmpty else { return }
         let newFlashcard = Flashcard(question: userQuestion, answer: userAnswer)
@@ -94,6 +116,7 @@ struct ContentView: View {
         userAnswer = ""
     }
 
+    // Function to delete a flashcard
     func deleteFlashcard(_ flashcard: Flashcard) {
         withAnimation {
             if let index = flashcards.firstIndex(where: { $0.id == flashcard.id }) {
@@ -102,6 +125,7 @@ struct ContentView: View {
         }
     }
 
+    // Function to reset the app
     func resetApp() {
         withAnimation {
             flashcards.removeAll()
@@ -109,43 +133,49 @@ struct ContentView: View {
     }
 }
 
+// View to display the quiz
 struct QuizView: View {
+    // Properties for managing quiz state and data
     var flashcards: [Flashcard]
-
     @State private var isFlippedArray: [Bool]
 
+    // Initializing the view with flashcards data
     init(flashcards: [Flashcard]) {
         self.flashcards = flashcards
         self._isFlippedArray = State(initialValue: Array(repeating: false, count: flashcards.count))
     }
 
     var body: some View {
+        // Scrolling view to display flashcards in a quiz
         ScrollView {
             VStack {
-                Text("Quiz Screen")
-                    .font(.largeTitle)
-                    .padding()
-
                 ForEach(Array(zip(flashcards, isFlippedArray)), id: \.0.id) { flashcard, isFlipped in
+                    // Individual quiz card view
                     QuizCardView(flashcard: flashcard, isFlipped: isFlipped) { flipped in
                         if let index = flashcards.firstIndex(where: { $0.id == flashcard.id }) {
                             isFlippedArray[index] = flipped
                         }
                     }
-                    .padding()
+                    .padding(10)
+                    .background(RoundedRectangle(cornerRadius: 12).fill(Color.blue))
+                    .foregroundColor(.white)
+                    .padding(.vertical, 8)
                 }
             }
         }
+        .background(Color(UIColor.systemTeal)) // Background color
         .navigationBarItems(trailing:
+            // Button to reset the quiz
             Button(action: resetQuiz) {
-                Text("Reset")
+                Image(systemName: "arrow.counterclockwise.circle.fill")
                     .foregroundColor(.blue)
                     .padding()
             }
         )
-        .navigationTitle("Quiz")
+        .navigationTitle("Quiz") // Title
     }
 
+    // Function to reset the quiz
     func resetQuiz() {
         withAnimation {
             isFlippedArray = Array(repeating: false, count: flashcards.count)
@@ -153,14 +183,18 @@ struct QuizView: View {
     }
 }
 
+// View to display an individual quiz card
 struct QuizCardView: View {
+    // Properties for managing quiz card state and data
     let flashcard: Flashcard
     let isFlipped: Bool
     let onFlip: (Bool) -> Void
 
     var body: some View {
+        // Displaying quiz card content
         VStack {
             if isFlipped {
+                // Flipped state showing the answer
                 ScrollView {
                     Text("Answer: \(flashcard.answer)")
                         .padding()
@@ -170,6 +204,7 @@ struct QuizCardView: View {
                         )
                 }
             } else {
+                // Unflipped state showing the question
                 ScrollView {
                     Text("Question: \(flashcard.question)")
                         .padding()
@@ -177,10 +212,11 @@ struct QuizCardView: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .background(Color.accentColor)
+        .background(RoundedRectangle(cornerRadius: 8).fill(Color.blue))
         .foregroundColor(.white)
         .cornerRadius(8)
         .onTapGesture {
+            // Handling tap to flip the card
             withAnimation {
                 self.onFlip(!self.isFlipped)
             }
@@ -192,10 +228,12 @@ struct QuizCardView: View {
     }
 }
 
+// Preview for the main content view
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
     }
 }
+
 
 
