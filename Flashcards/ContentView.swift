@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  Flashcards
-//
-//  Created by Umesh Sarma on 12/16/23.
-//
-
 import SwiftUI
 
 struct Flashcard: Identifiable {
@@ -50,6 +43,15 @@ struct ContentView: View {
                             .foregroundColor(.gray)
                     }
                 }
+
+                NavigationLink(destination: QuizView(flashcards: flashcards)) {
+                    Text("Start Quiz")
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                        .padding(.top, 20)
+                }
             }
             .padding()
             .navigationTitle("FlashCards App")
@@ -62,6 +64,22 @@ struct ContentView: View {
         flashcards.append(newFlashcard)
         userQuestion = ""
         userAnswer = ""
+    }
+}
+
+struct QuizView: View {
+    var flashcards: [Flashcard]
+
+    var body: some View {
+        // Customize your quiz view here
+        VStack {
+            Text("Quiz Screen")
+                .font(.largeTitle)
+                .padding()
+
+            // Add quiz-related components and logic here
+        }
+        .navigationTitle("Quiz")
     }
 }
 
