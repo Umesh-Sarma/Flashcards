@@ -21,10 +21,6 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             VStack {
-                Image(systemName: "globe")
-                    .imageScale(.large)
-                    .foregroundColor(.accentColor)
-
                 TextField("Type your question here", text: $userQuestion)
                     .padding()
                     .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -41,13 +37,31 @@ struct ContentView: View {
                         .cornerRadius(8)
                 }
 
-                List(flashcards) { flashcard in
-                    VStack(alignment: .leading) {
-                        Text("Question: \(flashcard.question)")
-                            .padding(.bottom, 4)
+                List {
+                    ForEach(flashcards) { flashcard in
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text("Question: \(flashcard.question)")
+                                    .padding(.bottom, 4)
 
-                        Text("Answer: \(flashcard.answer)")
-                            .foregroundColor(.gray)
+                                Text("Answer: \(flashcard.answer)")
+                                    .foregroundColor(.gray)
+                            }
+
+                            Spacer()
+
+                            Button(action: {
+                                // Show delete confirmation or perform deletion
+                                deleteFlashcard(flashcard)
+                            }) {
+                                Image(systemName: "minus.circle")
+                                    .foregroundColor(.red)
+                                    .padding()
+                            }
+                            .buttonStyle(BorderlessButtonStyle()) // Use BorderlessButtonStyle to avoid highlighting
+                        }
+                        .contentShape(Rectangle()) // Make the whole row tappable
+                        .onTapGesture {} // Empty onTapGesture to avoid triggering row tap
                     }
                 }
 
@@ -64,8 +78,7 @@ struct ContentView: View {
             .navigationTitle("FlashCards App")
             .navigationBarItems(trailing:
                 Button(action: resetApp) {
-                    Image(systemName: "arrow.counterclockwise.circle.fill")
-                        .imageScale(.large)
+                    Text("Reset")
                         .foregroundColor(.blue)
                         .padding()
                 }
@@ -79,6 +92,14 @@ struct ContentView: View {
         flashcards.append(newFlashcard)
         userQuestion = ""
         userAnswer = ""
+    }
+
+    func deleteFlashcard(_ flashcard: Flashcard) {
+        withAnimation {
+            if let index = flashcards.firstIndex(where: { $0.id == flashcard.id }) {
+                flashcards.remove(at: index)
+            }
+        }
     }
 
     func resetApp() {
@@ -99,30 +120,29 @@ struct QuizView: View {
     }
 
     var body: some View {
-        VStack {
-            HStack {
-                Spacer()
-                Button(action: resetQuiz) {
-                    Image(systemName: "arrow.counterclockwise.circle.fill")
-                        .imageScale(.large)
-                        .foregroundColor(.blue)
-                        .padding()
-                }
-            }
-            .padding()
+        ScrollView {
+            VStack {
+                Text("Quiz Screen")
+                    .font(.largeTitle)
+                    .padding()
 
-            Text("Quiz Screen")
-                .font(.largeTitle)
-                .padding()
-
-            ForEach(Array(zip(flashcards, isFlippedArray)), id: \.0.id) { flashcard, isFlipped in
-                QuizCardView(flashcard: flashcard, isFlipped: isFlipped) { flipped in
-                    if let index = flashcards.firstIndex(where: { $0.id == flashcard.id }) {
-                        isFlippedArray[index] = flipped
+                ForEach(Array(zip(flashcards, isFlippedArray)), id: \.0.id) { flashcard, isFlipped in
+                    QuizCardView(flashcard: flashcard, isFlipped: isFlipped) { flipped in
+                        if let index = flashcards.firstIndex(where: { $0.id == flashcard.id }) {
+                            isFlippedArray[index] = flipped
+                        }
                     }
+                    .padding()
                 }
             }
         }
+        .navigationBarItems(trailing:
+            Button(action: resetQuiz) {
+                Text("Reset")
+                    .foregroundColor(.blue)
+                    .padding()
+            }
+        )
         .navigationTitle("Quiz")
     }
 
@@ -141,18 +161,22 @@ struct QuizCardView: View {
     var body: some View {
         VStack {
             if isFlipped {
-                Text("Answer: \(flashcard.answer)")
-                    .padding()
-                    .rotation3DEffect(
-                        .degrees(180),
-                        axis: (x: 0.0, y: 1.0, z: 0.0)
-                    )
+                ScrollView {
+                    Text("Answer: \(flashcard.answer)")
+                        .padding()
+                        .rotation3DEffect(
+                            .degrees(180),
+                            axis: (x: 0.0, y: 1.0, z: 0.0)
+                        )
+                }
             } else {
-                Text("Question: \(flashcard.question)")
-                    .padding()
+                ScrollView {
+                    Text("Question: \(flashcard.question)")
+                        .padding()
+                }
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: 100)
+        .frame(maxWidth: .infinity)
         .background(Color.accentColor)
         .foregroundColor(.white)
         .cornerRadius(8)
@@ -173,3 +197,5 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
+
+
