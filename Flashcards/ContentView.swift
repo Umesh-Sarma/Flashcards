@@ -1,3 +1,10 @@
+//
+//  ContentView.swift
+//  Flashcards
+//
+//  Created by Umesh Sarma on 12/16/23.
+//
+
 import SwiftUI
 
 struct Flashcard: Identifiable {
@@ -35,13 +42,7 @@ struct ContentView: View {
                 }
 
                 List(flashcards) { flashcard in
-                    VStack(alignment: .leading) {
-                        Text("Question: \(flashcard.question)")
-                            .padding(.bottom, 4)
-
-                        Text("Answer: \(flashcard.answer)")
-                            .foregroundColor(.gray)
-                    }
+                    QuizCardView(flashcard: flashcard)
                 }
 
                 NavigationLink(destination: QuizView(flashcards: flashcards)) {
@@ -71,15 +72,46 @@ struct QuizView: View {
     var flashcards: [Flashcard]
 
     var body: some View {
-        // Customize your quiz view here
         VStack {
             Text("Quiz Screen")
                 .font(.largeTitle)
                 .padding()
 
-            // Add quiz-related components and logic here
+            ForEach(flashcards) { flashcard in
+                QuizCardView(flashcard: flashcard)
+            }
         }
         .navigationTitle("Quiz")
+    }
+}
+
+struct QuizCardView: View {
+    @State private var isFlipped = false
+    let flashcard: Flashcard
+
+    var body: some View {
+        VStack {
+            if isFlipped {
+                Text("Answer: \(flashcard.answer)")
+                    .padding()
+            } else {
+                Text("Question: \(flashcard.question)")
+                    .padding()
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: 100)
+        .background(Color.accentColor)
+        .foregroundColor(.white)
+        .cornerRadius(8)
+        .onTapGesture {
+            withAnimation {
+                self.isFlipped.toggle()
+            }
+        }
+        .rotation3DEffect(
+            .degrees(isFlipped ? 180 : 0),
+            axis: (x: 0.0, y: 1.0, z: 0.0)
+        )
     }
 }
 
@@ -88,3 +120,4 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
+
